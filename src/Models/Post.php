@@ -29,6 +29,7 @@ class Post extends Model
         'excerpt',
         'banner',
         'content',
+        'type'
         'published_at',
     ];
 

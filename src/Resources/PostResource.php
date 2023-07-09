@@ -74,7 +74,7 @@ class PostResource extends Resource
 
                         self::getContentEditor('content')
                             ->fileAttachmentsDisk(config('filament-blog.content.disk', 'public'))
-                            ->fileAttachmentsDirectory(config('filament-blog.banner.directory', 'content')),
+                            ->fileAttachmentsDirectory(config('filament-blog.content.directory', 'content')),
 
                         Forms\Components\BelongsToSelect::make('blog_author_id')
                             ->label(__('filament-blog::filament-blog.author'))

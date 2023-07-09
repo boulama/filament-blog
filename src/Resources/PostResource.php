@@ -48,14 +48,12 @@ class PostResource extends Resource
 
                         Forms\Components\TextInput::make('slug')
                             ->label(__('filament-blog::filament-blog.slug'))
-                            ->disabled()
                             ->required()
                             ->unique(Post::class, 'slug', fn ($record) => $record),
 
                         Forms\Components\Textarea::make('excerpt')
                             ->label(__('filament-blog::filament-blog.excerpt'))
                             ->rows(2)
-                            ->minLength(50)
                             ->maxLength(1000)
                             ->columnSpan([
                                 'sm' => 2,

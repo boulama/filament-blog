@@ -8,6 +8,18 @@ return [
      *      \Filament\Forms\Components\MarkdownEditor::class
      */
     'editor' => \Filament\Forms\Components\RichEditor::class,
+    
+    /**
+     * Configs for Posts internal file that give you option to change
+     * Disk,Directory name , maximum upload size and the
+     * Crop aspect ratio of the Posts banner image.
+     */
+    'content' => [
+        'disk' => 's3',
+        'directory' => 'media/' . date('d-m-y'),
+        'maxSize' => 5120,
+        'cropAspectRatio' => '16:9',
+    ],
 
     /**
      * Configs for Posts banner file that give you option to change

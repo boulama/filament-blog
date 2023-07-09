@@ -85,6 +85,15 @@ class PostResource extends Resource
                             ->relationship('category', 'name')
                             ->searchable()
                             ->required(),
+                             
+
+                        Forms\Components\Select::make('type')
+                            ->label('Type')
+                            ->options([
+                                    'post' => 'Post',
+                                    'page' => 'Page',
+                                ])->default('post')
+                            ->required(),
 
                         Forms\Components\DatePicker::make('published_at')
                             ->label(__('filament-blog::filament-blog.published_date')),

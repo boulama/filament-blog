@@ -71,6 +71,7 @@ class PostResource extends Resource
                             ]),
 
                         self::getContentEditor('content')
+                            ->fileAttachmentsVisibility('public')
                             ->fileAttachmentsDisk(config('filament-blog.content.disk', 'public'))
                             ->fileAttachmentsDirectory(config('filament-blog.content.directory', 'content')),
 

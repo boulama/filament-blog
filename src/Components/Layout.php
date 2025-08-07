@@ -16,6 +16,7 @@ class Layout extends Component
 
     public function render()
     {
+        $post = $this->post;
         $setting = Setting::first();
         if($post !== null) {
             $this->og['title'] = $post->seo_detail->title ?? $post->title;

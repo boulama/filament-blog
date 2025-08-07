@@ -7,6 +7,12 @@ use Illuminate\View\Component;
 
 class Layout extends Component
 {
+
+    public function __construct(
+        public $post = null,
+        public $data = null
+    ){}
+
     public function render()
     {
         $setting = Setting::first();

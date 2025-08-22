@@ -58,6 +58,8 @@ class Post extends Model
         'user_id' => 'integer',
     ];
 
+    protected $appends = ['feature_photo'];
+
     protected static function newFactory()
     {
         return new PostFactory();

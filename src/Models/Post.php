@@ -133,7 +133,7 @@ class Post extends Model
 
     protected function getFeaturePhotoAttribute()
     {
-        return Storage::disk(config(('FILAMENT_FILESYSTEM_DISK')))->url($this->cover_photo_path);
+        return Storage::disk(config(('filament.default_filesystem_disk')))->url($this->cover_photo_path);
     }
 
     public static function getForm()

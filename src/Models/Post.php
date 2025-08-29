@@ -13,6 +13,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use FilamentTiptapEditor\TiptapEditor;
+use Firefly\FilamentBlog\Components\ImageViewer;
 use Firefly\FilamentBlog\Database\Factories\PostFactory;
 use Firefly\FilamentBlog\Enums\PostStatus;
 use Illuminate\Database\Eloquent\Builder;
@@ -135,7 +136,12 @@ class Post extends Model
 
     protected function getFeaturePhotoAttribute()
     {
-        return Storage::disk(config(('filament.default_filesystem_disk')))->url($this->cover_photo_path);
+        if(filter_var($this->cover_photo_path, FILTER_VALIDATE_URL)) {
+            return $this->cover_photo_path;
+        }
+        else {
+            return  Storage::disk(config(('filament.default_filesystem_disk')))->url($this->cover_photo_path);
+        }
     }
 
     public static function getForm()
@@ -187,18 +193,41 @@ class Post extends Model
                     Fieldset::make('Feature Image')
                         ->schema([
                             FileUpload::make('cover_photo_path')
-                                ->label('Cover Photo')
-                                ->directory('/blog-feature-images')
-                                ->hint('This cover image is used in your blog post as a feature image. Recommended image size 1200 X 628')
+                                ->label('Upload Cover Photo')
+                                ->directory('blog-feature-images')
+                                ->hint('This cover image is used in your blog post as a feature image. Recommended image size 1200 x 628')
                                 ->image()
                                 ->preserveFilenames()
                                 ->imageEditor()
                                 ->maxSize(1024 * 5)
-                                ->rules('dimensions:max_width=1920,max_height=1004')
-                                ->required(),
-                            TextInput::make('photo_alt_text')->required(),
-                        ])->columns(1),
+                                ->rules(['dimensions:max_width=1920,max_height=1004'])
+                                ->required(fn ($get) => !filled($get('predefined_cover_photo')))
+                                ->disabled(fn ($get) => filled($get('predefined_cover_photo')))
+                                ->hidden(fn ($get) => filled($get('predefined_cover_photo'))),
 
+                            ImageViewer::make('cover_photo')
+                                ->label('Cover')
+                                ->disabled(fn ($get) => !filled($get('predefined_cover_photo')))
+                                ->dehydrated(false) // display-only
+                                ->image(fn ($get) => $get('cover_photo_path')),
+                            TextInput::make('cover_photo_path')
+                                ->disabled(fn ($get) => !filled($get('predefined_cover_photo')))
+                                ->hidden(fn ($get) => !filled($get('predefined_cover_photo'))),
+
+                            Select::make('predefined_cover_photo')
+                                ->label('Or choose from predefined images')
+                                ->options(config('filamentblog.predefined_covers'))
+                                ->reactive()
+                                ->searchable()
+                                ->afterStateUpdated(function ($set, $state) {
+                                    $set('cover_photo_path', $state); // populate the file upload field
+                                }),
+
+                            TextInput::make('photo_alt_text')
+                                ->label('Alt Text')
+                                ->required(),
+                        ])
+                        ->columns(1),
                     Fieldset::make('Status')
                         ->schema([
 
@@ -215,7 +244,6 @@ class Post extends Model
                                 ->required(function ($get) {
                                     return $get('status') === PostStatus::SCHEDULED->value;
                                 })
-                                ->minDate(now()->addMinutes(5))
                                 ->native(false),
                         ]),
                     Select::make(config('filamentblog.user.foreign_key'))

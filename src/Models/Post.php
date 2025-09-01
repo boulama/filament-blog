@@ -236,13 +236,17 @@ class Post extends Model
                                 ->inline()
                                 ->options(PostStatus::class)
                                 ->required(),
-
                             DateTimePicker::make('scheduled_for')
                                 ->visible(function ($get) {
                                     return $get('status') === PostStatus::SCHEDULED->value;
                                 })
                                 ->required(function ($get) {
                                     return $get('status') === PostStatus::SCHEDULED->value;
+                                })
+                                ->native(false),
+                            DateTimePicker::make('published_at')
+                                ->visible(function ($get) {
+                                    return $get('status') === PostStatus::PUBLISHED->value;
                                 })
                                 ->native(false),
                         ]),

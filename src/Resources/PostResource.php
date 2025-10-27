@@ -82,6 +82,12 @@ class PostResource extends Resource
                     ->searchable()
                     ->preload()
                     ->multiple(),
+                Tables\Filters\SelectFilter::make('categories')
+                    ->relationship('categories', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->label('Category'),
             ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
@@ -124,7 +130,7 @@ class PostResource extends Resource
                     Fieldset::make('Description')
                         ->schema([
                             TextEntry::make('body')
-                                ->html()
+                                ->markdown()
                                 ->columnSpanFull(),
                         ]),
                 ]),

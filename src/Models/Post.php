@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Filament\Forms\Components\MarkdownEditor;
 
 class Post extends Model
 {
@@ -134,6 +135,21 @@ class Post extends Model
         })->published()->with('user')->take($take)->get();
     }
 
+    public function relatedPostsByTags($take = 3)
+    {
+        return $this->whereHas('tags', function ($query) {
+                $query->whereIn(
+                    config('filamentblog.tables.prefix') . 'tags.id',
+                    $this->tags->pluck('id')
+                );
+            })
+            ->where(config('filamentblog.tables.prefix') . 'posts.id', '!=', $this->id)
+            ->published()
+            ->with('user')
+            ->take($take)
+            ->get();
+    }
+
     protected function getFeaturePhotoAttribute()
     {
         if(filter_var($this->cover_photo_path, FILTER_VALIDATE_URL)) {
@@ -184,10 +200,7 @@ class Post extends Model
                                 ->relationship('tags', 'name')
                                 ->columnSpanFull(),
                         ]),
-                    TiptapEditor::make('body')
-                        ->profile('default')
-                        ->disableFloatingMenus()
-                        ->extraInputAttributes(['style' => 'max-height: 30rem; min-height: 24rem'])
+                    MarkdownEditor::make('body')
                         ->required()
                         ->columnSpanFull(),
                     Fieldset::make('Feature Image')
@@ -199,6 +212,7 @@ class Post extends Model
                                 ->image()
                                 ->preserveFilenames()
                                 ->imageEditor()
+                                ->disk(config('filament.default_filesystem_disk'))
                                 ->maxSize(1024 * 5)
                                 ->rules(['dimensions:max_width=1920,max_height=1004'])
                                 ->required(fn ($get) => !filled($get('predefined_cover_photo')))

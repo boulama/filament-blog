@@ -44,6 +44,20 @@ class ListPosts extends ListRecords
                     $query->scheduled();
                 })
                 ->icon('heroicon-o-calendar-days'),
+            'categories' => Tab::make('Blog Posts')
+                ->modifyQueryUsing(function ($query) {
+                    $query->whereDoesntHave('categories', function ($q) {
+                        $q->where('slug', 'like', '%answer%');
+                    });
+                })
+                ->icon('heroicon-o-bookmark'),
+            'answers' => Tab::make('Answers')
+                ->modifyQueryUsing(function ($query) {
+                    $query->whereHas('categories', function ($q) {
+                        $q->where('slug', 'answers');
+                    });
+                })
+                ->icon('heroicon-o-question-mark-circle'),
         ];
     }
 }

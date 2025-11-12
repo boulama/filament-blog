@@ -205,8 +205,37 @@ class Post extends Model
                         ->columnSpanFull(),
                     Fieldset::make('Feature Image')
                         ->schema([
+                            Select::make('predefined_cover_photo')
+                                ->label('Choose from predefined images')
+                                ->options(config('filamentblog.predefined_covers'))
+                                ->live()
+                                ->searchable()
+                                ->afterStateHydrated(function ($set, $get, $state, $record) {
+                                    // If cover_photo_path is a URL, treat it as predefined
+                                    if ($record && !$state) {
+                                        $coverPath = $record->cover_photo_path;
+                                        if ($coverPath && filter_var($coverPath, FILTER_VALIDATE_URL)) {
+                                            $set('predefined_cover_photo', $coverPath);
+                                        }
+                                    }
+                                })
+                                ->afterStateUpdated(function ($set, $state) {
+                                    $set('cover_photo_path', $state); // populate the file upload field
+                                }),
+
+                            ImageViewer::make('cover_photo')
+                                ->label('Cover Preview')
+                                ->visible(fn ($get) => filled($get('predefined_cover_photo')))
+                                ->dehydrated(false) // display-only
+                                ->image(fn ($get) => $get('cover_photo_path')),
+
+                            TextInput::make('cover_photo_path')
+                                ->label('Cover Photo URL')
+                                ->visible(fn ($get) => filled($get('predefined_cover_photo')))
+                                ->disabled(),
+
                             FileUpload::make('cover_photo_path')
-                                ->label('Upload Cover Photo')
+                                ->label('Or Upload Cover Photo')
                                 ->directory('blog-feature-images')
                                 ->hint('This cover image is used in your blog post as a feature image. Recommended image size 1200 x 628')
                                 ->image()
@@ -216,26 +245,7 @@ class Post extends Model
                                 ->maxSize(1024 * 5)
                                 ->rules(['dimensions:max_width=1920,max_height=1004'])
                                 ->required(fn ($get) => !filled($get('predefined_cover_photo')))
-                                ->disabled(fn ($get) => filled($get('predefined_cover_photo')))
-                                ->hidden(fn ($get) => filled($get('predefined_cover_photo'))),
-
-                            ImageViewer::make('cover_photo')
-                                ->label('Cover')
-                                ->disabled(fn ($get) => !filled($get('predefined_cover_photo')))
-                                ->dehydrated(false) // display-only
-                                ->image(fn ($get) => $get('cover_photo_path')),
-                            TextInput::make('cover_photo_path')
-                                ->disabled(fn ($get) => !filled($get('predefined_cover_photo')))
-                                ->hidden(fn ($get) => !filled($get('predefined_cover_photo'))),
-
-                            Select::make('predefined_cover_photo')
-                                ->label('Or choose from predefined images')
-                                ->options(config('filamentblog.predefined_covers'))
-                                ->reactive()
-                                ->searchable()
-                                ->afterStateUpdated(function ($set, $state) {
-                                    $set('cover_photo_path', $state); // populate the file upload field
-                                }),
+                                ->visible(fn ($get) => !filled($get('predefined_cover_photo'))),
 
                             TextInput::make('photo_alt_text')
                                 ->label('Alt Text')
